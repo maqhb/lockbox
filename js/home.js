@@ -244,15 +244,32 @@ function updateLockerWithData(lockbox){
 
 function renderRecentImageModal(lockerId){
     $('#recentImage .modal-body').html("<p>Loading</p>")
-    let ImageObj = lockersData[lockerId].latestImage
-    let html = "<p>No Recent Image</p>"
-    if(ImageObj !=undefined){
-        const timestamp = Object.keys(ImageObj);
+    http = new XMLHttpRequest()
+    token = this.getCookie('idToken')
+    //https://armabox.firebaseio.com/LockerDb/lockerid2/latestImage
+    http.open("GET", 'https://armabox.firebaseio.com/LockerDb/'+lockerId+'/latestImage.json?auth='+token)
+    http.send()
+    http.onload = RecentImage
+}
+
+function RecentImage(){
+    if(http.status == 401){
+        alert("Unauthorized Acess or Token is expired")
+        //Replace it with the actual domain + do same changes in above callback
+        window.location.replace("index.html");
+    }else{
+        let ImageObj = http.responseText
+        ImageObj = $.parseJSON(ImageObj)
+        let html = "<p>No Recent Image</p>"
+        if(ImageObj !=undefined && ImageObj != null){
+        let timestamp = Object.keys(ImageObj);
+        console.log(timestamp)
         html = '<p class="mb-2"><span id="Day">'+timeConverter(timestamp)+'</span></p>'
                 +'<img class="img-responsive" src="data:image/jpeg;base64,'+ImageObj[timestamp]
                 +'" alt=""></img>'
+        }
+        $('#recentImage .modal-body').html(html)
     }
-    $('#recentImage .modal-body').html(html)
 }
 
 
